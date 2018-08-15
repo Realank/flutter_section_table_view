@@ -30,7 +30,7 @@ class ListPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('DishListPage'),
+        title: Text('ListPage'),
       ),
       body: SectionTableView(
         sectionCount: 2,
