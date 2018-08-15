@@ -28,7 +28,11 @@ SectionTableView(
 );
 ```
 
-![](./screenshot.png)
+
+| iOS | android |
+| --- | ------- |
+| ![](./screen_ios.png) | ![](./screen_android.png)|
+
 
 
 ## Getting Started
