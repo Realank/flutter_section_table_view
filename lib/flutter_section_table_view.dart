@@ -10,6 +10,7 @@ typedef Widget SectionHeaderCallBack(int section);
 typedef double SectionHeaderHeightCallBack(int section);
 typedef double DividerHeightCallBack();
 typedef double CellHeightAtIndexPathCallBack(int section, int row);
+typedef void SectionTableViewScrollToCallBack(int section, int row, bool isScrollDown);
 
 class IndexPath {
   final int section;
@@ -37,8 +38,9 @@ class SectionTableController extends ChangeNotifier {
   IndexPath topIndex;
   bool dirty = false;
   bool animate = false;
+  SectionTableViewScrollToCallBack sectionTableViewScrollTo;
 
-  SectionTableController([int section = 0, int row = -1]) {
+  SectionTableController({int section = 0, int row = -1, this.sectionTableViewScrollTo}) {
     topIndex = IndexPath(section: section, row: row);
   }
 
@@ -150,8 +152,8 @@ class _SectionTableViewState extends State<SectionTableView> {
 
     //calculate indexPath to offset mapping
     if (widget.controller != null) {
-      if (widget.sectionHeaderHeight == null ||
-          widget.dividerHeight == null ||
+      if ((showSectionHeader && widget.sectionHeaderHeight == null) ||
+          (showDivider && widget.dividerHeight == null) ||
           widget.cellHeightAtIndexPath == null) {
         print(
             '''error: if you want to use controller to scroll SectionTableView to wanted index path, 
@@ -241,6 +243,10 @@ class _SectionTableViewState extends State<SectionTableView> {
             preIndexOffset = indexPathToOffsetSearch[currentIndexPath.toString()];
             nextIndexOffset = indexPathToOffsetSearch[nextIndexPath.toString()];
             print('go previous index $currentIndexPath');
+            if (widget.controller.sectionTableViewScrollTo != null) {
+              widget.controller
+                  .sectionTableViewScrollTo(currentIndexPath.section, currentIndexPath.row, false);
+            }
           }
         } else if (currentOffset >= nextIndexOffset) {
           //go next cell
@@ -252,6 +258,10 @@ class _SectionTableViewState extends State<SectionTableView> {
             preIndexOffset = indexPathToOffsetSearch[currentIndexPath.toString()];
             nextIndexOffset = indexPathToOffsetSearch[nextIndexPath.toString()];
             print('go next index $currentIndexPath');
+            if (widget.controller.sectionTableViewScrollTo != null) {
+              widget.controller
+                  .sectionTableViewScrollTo(currentIndexPath.section, currentIndexPath.row, true);
+            }
           }
         }
       });

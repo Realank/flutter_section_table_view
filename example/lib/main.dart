@@ -26,7 +26,9 @@ class MyApp extends StatelessWidget {
 }
 
 class ListPage extends StatelessWidget {
-  final controller = SectionTableController(2, 3);
+  final controller = SectionTableController(sectionTableViewScrollTo: (section, row, isScrollDown) {
+    print('received scroll to $section $row scrollDown:$isScrollDown');
+  });
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -36,13 +38,13 @@ class ListPage extends StatelessWidget {
       floatingActionButton: FloatingActionButton(
           child: Icon(Icons.keyboard_arrow_down),
           onPressed: () {
-            controller.animateTo(2, 3).then((complete) {
+            controller.animateTo(2, -1).then((complete) {
               print('animated $complete');
             });
           }),
       body: SafeArea(
         child: SectionTableView(
-          sectionCount: 5,
+          sectionCount: 7,
           numOfRowInSection: (section) {
             return section == 0 ? 3 : 4;
           },
