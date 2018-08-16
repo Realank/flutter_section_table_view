@@ -6,27 +6,37 @@ A iOS like table view including section, row, section header and divider
 
 ```dart
 SectionTableView(
-    sectionCount: 2,
-    numOfRowInSection: (section) {
-      return section == 0 ? 3 : 4;
-    },
-    cellAtIndexPath: (section, row) {
-      return ListTile(
-        leading: Text('Cell $section $row'),
+        sectionCount: 10,
+        numOfRowInSection: (section) {
+          return section == 0 ? 3 : 4;
+        },
+        cellAtIndexPath: (section, row) {
+          return Container(
+            height: 44.0,
+            child: Center(
+              child: Text('Cell $section $row'),
+            ),
+          );
+        },
+        headerInSection: (section) {
+          return Container(
+            height: 25.0,
+            color: Colors.grey,
+            child: Text('Header $section'),
+          );
+        },
+        divider: Container(
+          color: Colors.green,
+          height: 1.0,
+        ),
+        controller: controller,//SectionTableController
+        sectionHeaderHeight: (section) => 25.0,
+        dividerHeight: () => 1.0,
+        cellHeightAtIndexPath: (section, row) => 44.0,
       );
-    },
-    headerInSection: (section) {
-      return Container(
-        color: Colors.grey,
-        child: Text('Header $section'),
-      );
-    },
-    divider: Container(
-      color: Colors.green,
-      height: 0.5,
-    ),
-);
 ```
+
+and you can animate/jump to corresponding indexPath by `calling controller.animateTo(2, 3)`
 
 
 | iOS | android |
