@@ -7,8 +7,8 @@
 
 ## Usage
 
-#### first
-init Section Table Controller, so that you can scroll table view by index path (optional)
+#### first(optional)
+init Section Table Controller, so that you can scroll table view by index path
 
 and you can pass a callback function to get scrolled position when scrolling
 ```dart
