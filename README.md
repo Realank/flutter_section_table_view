@@ -2,6 +2,8 @@
 
 A iOS like table view including section, row, section header and divider
 
+and you can animate/jump to specific index path
+
 ## Usage
 
 ```dart
