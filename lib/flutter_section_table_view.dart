@@ -271,6 +271,8 @@ class _SectionTableViewState extends State<SectionTableView> {
   @override
   void dispose() {
     super.dispose();
+    scrollController.dispose();
+    print('SectionTableView dispose');
   }
 
   @override
