@@ -56,7 +56,7 @@ class SectionTableController extends ChangeNotifier {
     animate = true;
     dirty = true;
     notifyListeners();
-    return Future.delayed(Duration(microseconds: 251), () => true);
+    return Future.delayed(Duration(milliseconds: 251), () => true);
   }
 }
 
