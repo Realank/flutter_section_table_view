@@ -101,6 +101,8 @@ class _SectionTableViewState extends State<SectionTableView> {
   double preIndexOffset;
   double nextIndexOffset;
 
+  bool showDivider;
+
   double scrollOffsetFromIndex(IndexPath indexPath) {
     var offset = indexPathToOffsetSearch[indexPath.toString()];
     if (offset == null) {
@@ -128,7 +130,7 @@ class _SectionTableViewState extends State<SectionTableView> {
       return;
     }
     //calculate index to indexPath mapping
-    bool showDivider = false;
+    showDivider = false;
     bool showSectionHeader = false;
     if (widget.divider != null) {
       showDivider = true;
@@ -144,9 +146,6 @@ class _SectionTableViewState extends State<SectionTableView> {
       int rows = widget.numOfRowInSection(i);
       for (int j = 0; j < rows; j++) {
         indexToIndexPathSearch.add(IndexPath(section: i, row: j));
-        if (showDivider) {
-          indexToIndexPathSearch.add(IndexPath(section: -1, row: -1));
-        }
       }
     }
 
@@ -296,12 +295,15 @@ class _SectionTableViewState extends State<SectionTableView> {
       return widget.headerInSection(indexPath.section);
     }
 
-    if (indexPath.section < 0 && indexPath.row < 0) {
-      return widget.divider;
-    }
-
     Widget cell = widget.cellAtIndexPath(indexPath.section, indexPath.row);
-    return cell;
+    if (showDivider) {
+      return Column(
+        children: <Widget>[cell, widget.divider],
+        mainAxisSize: MainAxisSize.min,
+      );
+    } else {
+      return cell;
+    }
   }
 
   @override
