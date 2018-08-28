@@ -62,11 +62,8 @@ class SectionTableController extends ChangeNotifier {
 
 class SectionTableView extends StatefulWidget {
   final Widget divider;
-  @required
   final int sectionCount;
-  @required
   final RowCountInSectionCallBack numOfRowInSection;
-  @required
   final CellAtIndexPathCallBack cellAtIndexPath;
   final SectionHeaderCallBack headerInSection;
 
@@ -78,10 +75,10 @@ class SectionTableView extends StatefulWidget {
   final SectionTableController
       controller; //you can use this controller to scroll section table view
   SectionTableView(
-      {this.divider,
-      this.sectionCount,
-      this.numOfRowInSection,
-      this.cellAtIndexPath,
+      {@required this.sectionCount,
+      @required this.numOfRowInSection,
+      @required this.cellAtIndexPath,
+      this.divider,
       this.headerInSection,
       this.controller,
       this.sectionHeaderHeight,
