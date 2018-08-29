@@ -7,3 +7,4 @@
 ## [0.1.0] - fix bug and release 0.1.0
 ## [0.1.1] - change divider layout
 ## [0.2.0] - add pull up/down refresh
+## [0.2.1] - fix readme

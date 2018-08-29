@@ -84,7 +84,7 @@ class _SmartRefresherState extends State<SmartRefresher> {
   // listen the listen offset or on...
   ScrollController get _scrollController => widget.controller.scrollController;
   // the bool will check the user if dragging on the screen.
-  bool _isDragging = false;
+//  bool _isDragging = false;
   // key to get height header of footer
   final GlobalKey _headerKey = new GlobalKey(), _footerKey = new GlobalKey();
   // the height must be  equals your headerBuilder
