@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_section_table_view/flutter_section_table_view.dart';
 
 class SectionList extends StatelessWidget {
-  final controller = SectionTableController(sectionTableViewScrollTo: (section, row, isScrollDown) {
+  final controller = SectionTableController(
+      sectionTableViewScrollTo: (section, row, isScrollDown) {
     print('received scroll to $section $row scrollDown:$isScrollDown');
   });
 

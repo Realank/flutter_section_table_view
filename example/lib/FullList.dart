@@ -21,7 +21,8 @@ class _FullListState extends State<FullList> {
   }
 
   int sectionCount = 9;
-  final controller = SectionTableController(sectionTableViewScrollTo: (section, row, isScrollDown) {
+  final controller = SectionTableController(
+      sectionTableViewScrollTo: (section, row, isScrollDown) {
     print('received scroll to $section $row scrollDown:$isScrollDown');
   });
   final refreshController = RefreshController();

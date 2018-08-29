@@ -11,9 +11,19 @@ import '../../pull_to_refresh.dart';
 enum IconPosition { left, right, top, bottom }
 
 class ClassicIndicator extends Indicator {
-  final String releaseText, idleText, refreshingText, completeText, failedText, noDataText;
+  final String releaseText,
+      idleText,
+      refreshingText,
+      completeText,
+      failedText,
+      noDataText;
 
-  final Widget releaseIcon, idleIcon, refreshingIcon, completeIcon, failedIcon, noMoreIcon;
+  final Widget releaseIcon,
+      idleIcon,
+      refreshingIcon,
+      completeIcon,
+      failedIcon,
+      noMoreIcon;
 
   final double height;
 
@@ -61,7 +71,9 @@ class _ClassicIndicatorState extends State<ClassicIndicator> {
                     ? widget.failedText
                     : widget.mode == RefreshStatus.refreshing
                         ? widget.refreshingText
-                        : widget.mode == RefreshStatus.noMore ? widget.noDataText : widget.idleText,
+                        : widget.mode == RefreshStatus.noMore
+                            ? widget.noDataText
+                            : widget.idleText,
         style: widget.textStyle);
   }
 
@@ -97,16 +109,19 @@ class _ClassicIndicatorState extends State<ClassicIndicator> {
       ),
       textWidget
     ];
-    Widget container = (widget.iconPos == IconPosition.top || widget.iconPos == IconPosition.bottom)
+    Widget container = (widget.iconPos == IconPosition.top ||
+            widget.iconPos == IconPosition.bottom)
         ? new Column(
             mainAxisAlignment: MainAxisAlignment.center,
-            verticalDirection:
-                widget.iconPos == IconPosition.top ? VerticalDirection.down : VerticalDirection.up,
+            verticalDirection: widget.iconPos == IconPosition.top
+                ? VerticalDirection.down
+                : VerticalDirection.up,
             children: children,
           )
         : new Row(
-            textDirection:
-                widget.iconPos == IconPosition.right ? TextDirection.rtl : TextDirection.ltr,
+            textDirection: widget.iconPos == IconPosition.right
+                ? TextDirection.rtl
+                : TextDirection.ltr,
             mainAxisAlignment: MainAxisAlignment.center,
             children: children,
           );

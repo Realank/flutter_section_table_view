@@ -31,17 +31,23 @@ abstract class Wrapper extends StatefulWidget {
   set mode(int mode) => this.modeListener.value = mode;
 
   Wrapper(
-      {Key key, @required this.up, @required this.modeListener, this.builder, this.triggerDistance})
+      {Key key,
+      @required this.up,
+      @required this.modeListener,
+      this.builder,
+      this.triggerDistance})
       : assert(up != null, modeListener != null),
         super(key: key);
 
   bool _isScrollToOutSide(ScrollNotification notification) {
     if (up) {
-      if (notification.metrics.minScrollExtent - notification.metrics.pixels > 0) {
+      if (notification.metrics.minScrollExtent - notification.metrics.pixels >
+          0) {
         return true;
       }
     } else {
-      if (notification.metrics.pixels - notification.metrics.maxScrollExtent > 0) {
+      if (notification.metrics.pixels - notification.metrics.maxScrollExtent >
+          0) {
         return true;
       }
     }
@@ -105,10 +111,12 @@ class RefreshWrapperState extends State<RefreshWrapper>
 
   double _measure(ScrollNotification notification) {
     if (widget.up) {
-      return (notification.metrics.minScrollExtent - notification.metrics.pixels) /
+      return (notification.metrics.minScrollExtent -
+              notification.metrics.pixels) /
           widget.triggerDistance;
     } else {
-      return (notification.metrics.pixels - notification.metrics.maxScrollExtent) /
+      return (notification.metrics.pixels -
+              notification.metrics.maxScrollExtent) /
           widget.triggerDistance;
     }
   }
@@ -152,7 +160,8 @@ class RefreshWrapperState extends State<RefreshWrapper>
 
   void _handleOffsetCallBack() {
     if (widget.onOffsetChange != null) {
-      widget.onOffsetChange(widget.up, _sizeController.value * widget.visibleRange);
+      widget.onOffsetChange(
+          widget.up, _sizeController.value * widget.visibleRange);
     }
   }
 
@@ -162,12 +171,14 @@ class RefreshWrapperState extends State<RefreshWrapper>
         _sizeController.value = 1.0;
         break;
       case RefreshStatus.completed:
-        new Future.delayed(new Duration(milliseconds: widget.completeDuration), () {
+        new Future.delayed(new Duration(milliseconds: widget.completeDuration),
+            () {
           _dismiss();
         });
         break;
       case RefreshStatus.failed:
-        new Future.delayed(new Duration(milliseconds: widget.completeDuration), () {
+        new Future.delayed(new Duration(milliseconds: widget.completeDuration),
+            () {
           _dismiss();
         }).then((val) {
           widget.mode = RefreshStatus.idle;
@@ -190,7 +201,9 @@ class RefreshWrapperState extends State<RefreshWrapper>
     // TODO: implement initState
     super.initState();
     this._sizeController = new AnimationController(
-        vsync: this, lowerBound: minSpace, duration: const Duration(milliseconds: spaceAnimateMill))
+        vsync: this,
+        lowerBound: minSpace,
+        duration: const Duration(milliseconds: spaceAnimateMill))
       ..addListener(_handleOffsetCallBack);
     widget.modeListener.addListener(_handleModeChange);
   }
@@ -287,9 +300,11 @@ class LoadWrapperState extends State<LoadWrapper> implements GestureProcessor {
 //    }
     if (widget._isRefreshing || widget._isComplete) return;
     if (widget.autoLoad) {
-      if (widget.up && notification.metrics.extentBefore <= widget.triggerDistance)
+      if (widget.up &&
+          notification.metrics.extentBefore <= widget.triggerDistance)
         widget.mode = RefreshStatus.refreshing;
-      if (!widget.up && notification.metrics.extentAfter <= widget.triggerDistance)
+      if (!widget.up &&
+          notification.metrics.extentAfter <= widget.triggerDistance)
         widget.mode = RefreshStatus.refreshing;
     }
   }
@@ -299,9 +314,11 @@ class LoadWrapperState extends State<LoadWrapper> implements GestureProcessor {
     // TODO: implement onDragEnd
     if (widget._isRefreshing || widget._isComplete) return;
     if (widget.autoLoad) {
-      if (widget.up && notification.metrics.extentBefore <= widget.triggerDistance)
+      if (widget.up &&
+          notification.metrics.extentBefore <= widget.triggerDistance)
         widget.mode = RefreshStatus.refreshing;
-      if (!widget.up && notification.metrics.extentAfter <= widget.triggerDistance)
+      if (!widget.up &&
+          notification.metrics.extentAfter <= widget.triggerDistance)
         widget.mode = RefreshStatus.refreshing;
     }
   }
