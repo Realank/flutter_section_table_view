@@ -1,7 +1,7 @@
 # flutter_section_table_view
 
 - A iOS like table view including section, row, section header and divider
-- Supported both Android and iOS
+- Support both Android and iOS
 - Support drop-down refresh and pull-up load (based on [pull_to_refresh](https://pub.dartlang.org/packages/pull_to_refresh))
 - you can animate/jump to specific index path
 - you can know which index path it scrolled to, when scrolling
