@@ -1,11 +1,11 @@
 library flutter_section_table_view;
 
-export 'package:pull_to_refresh/pull_to_refresh.dart';
+export 'pullrefresh/pull_to_refresh.dart';
 
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'dart:math';
-import 'package:pull_to_refresh/pull_to_refresh.dart';
+import 'pullrefresh/pull_to_refresh.dart';
 
 typedef int RowCountInSectionCallBack(int section);
 typedef Widget CellAtIndexPathCallBack(int section, int row);
@@ -80,8 +80,10 @@ class SectionTableView extends StatefulWidget {
       controller; //you can use this controller to scroll section table view
 
   //pull refresh
-  final IndicatorBuilder refreshHeaderBuilder; // custom your own refreshHeader
-  final IndicatorBuilder refreshFooterBuilder; // custom your own refreshFooter
+  final IndicatorBuilder
+      refreshHeaderBuilder; // custom your own refreshHeader, height = 60.0 is better, other value will result in wrong scroll to indexpath offset
+  final IndicatorBuilder
+      refreshFooterBuilder; // custom your own refreshFooter, height = 60.0 is better
   final Config refreshHeaderConfig, refreshFooterConfig; // configure your refresh header and footer
   final bool enablePullUp;
   final bool enablePullDown;
@@ -158,7 +160,13 @@ class _SectionTableViewState extends State<SectionTableView> {
         indexPathToOffsetSearch[IndexPath(section: widget.sectionCount, row: -1).toString()];
 
     if (listViewKey.currentContext != null && contentHeight != null) {
-      final listViewHeight = listViewKey.currentContext.size.height;
+      double listViewHeight = listViewKey.currentContext.size.height;
+      if (widget.enablePullUp) {
+        listViewHeight -= 60.0; //refresh header height
+      }
+      if (widget.enablePullDown) {
+        listViewHeight -= 60.0; //refresh footer height
+      }
       if (offset + listViewHeight > contentHeight) {
         // avoid over scroll(bounds)
         return max(0.0, contentHeight - listViewHeight);
@@ -168,10 +176,7 @@ class _SectionTableViewState extends State<SectionTableView> {
     return offset;
   }
 
-  @override
-  void initState() {
-    super.initState();
-
+  void calculateIndexPathAndOffset() {
     if (widget.sectionCount == 0) {
       return;
     }
@@ -185,6 +190,7 @@ class _SectionTableViewState extends State<SectionTableView> {
       showSectionHeader = true;
     }
 
+    indexToIndexPathSearch = [];
     for (int i = 0; i < widget.sectionCount; i++) {
       if (showSectionHeader) {
         indexToIndexPathSearch.add(IndexPath(section: i, row: -1));
@@ -195,34 +201,44 @@ class _SectionTableViewState extends State<SectionTableView> {
       }
     }
 
+    if (widget.controller == null) {
+      return;
+    }
+
+    //only execute below when user want count height and scroll to specific index path
     //calculate indexPath to offset mapping
-    if (widget.controller != null) {
-      if ((showSectionHeader && widget.sectionHeaderHeight == null) ||
-          (showDivider && widget.dividerHeight == null) ||
-          widget.cellHeightAtIndexPath == null) {
-        print(
-            '''error: if you want to use controller to scroll SectionTableView to wanted index path, 
+    indexPathToOffsetSearch = {};
+    final sectionController = widget.controller;
+    if ((showSectionHeader && widget.sectionHeaderHeight == null) ||
+        (showDivider && widget.dividerHeight == null) ||
+        widget.cellHeightAtIndexPath == null) {
+      print(
+          '''error: if you want to use controller to scroll SectionTableView to wanted index path, 
                you need to pass parameters: 
                [sectionHeaderHeight][dividerHeight][cellHeightAtIndexPath]''');
-      } else {
-        indexPathToOffsetSearch = {};
-        double offset = 0.0;
-        double dividerHeight = showDivider ? widget.dividerHeight() : 0.0;
-        for (int i = 0; i < widget.sectionCount; i++) {
-          if (showSectionHeader) {
-            indexPathToOffsetSearch[IndexPath(section: i, row: -1).toString()] = offset;
-            offset += widget.sectionHeaderHeight(i);
-          }
-          int rows = widget.numOfRowInSection(i);
-          for (int j = 0; j < rows; j++) {
-            indexPathToOffsetSearch[IndexPath(section: i, row: j).toString()] = offset;
-            offset += widget.cellHeightAtIndexPath(i, j) + dividerHeight;
-          }
+    } else {
+      double offset = 0.0;
+      double dividerHeight = showDivider ? widget.dividerHeight() : 0.0;
+      for (int i = 0; i < widget.sectionCount; i++) {
+        if (showSectionHeader) {
+          indexPathToOffsetSearch[IndexPath(section: i, row: -1).toString()] = offset;
+          offset += widget.sectionHeaderHeight(i);
         }
-        indexPathToOffsetSearch[IndexPath(section: widget.sectionCount, row: -1).toString()] =
-            offset; //list view length
+        int rows = widget.numOfRowInSection(i);
+        for (int j = 0; j < rows; j++) {
+          indexPathToOffsetSearch[IndexPath(section: i, row: j).toString()] = offset;
+          offset += widget.cellHeightAtIndexPath(i, j) + dividerHeight;
+        }
       }
+      indexPathToOffsetSearch[IndexPath(section: widget.sectionCount, row: -1).toString()] =
+          offset; //list view length
     }
+
+    //calculate initial scroll offset
+//      double initialOffset = scrollOffsetFromIndex(widget.controller.topIndex);
+//      if (initialOffset == null) {
+//        initialOffset = 0.0;
+//      }
 
     int findValidIndexPathByIndex(int index, int pace) {
       for (int i = index + pace; (i >= 0 && i < indexToIndexPathSearch.length); i += pace) {
@@ -234,17 +250,10 @@ class _SectionTableViewState extends State<SectionTableView> {
       return index;
     }
 
-    //calculate initial scroll offset
-    SectionTableController sectionTableController = widget.controller;
-
-    double initialOffset = scrollOffsetFromIndex(sectionTableController.topIndex);
-    if (initialOffset == null) {
-      initialOffset = 0.0;
-    }
     if (indexPathToOffsetSearch != null) {
       currentIndex = 0;
       for (int i = 0; i < indexToIndexPathSearch.length; i++) {
-        if (indexToIndexPathSearch[i] == sectionTableController.topIndex) {
+        if (indexToIndexPathSearch[i] == sectionController.topIndex) {
           currentIndex = i;
         }
       }
@@ -259,13 +268,13 @@ class _SectionTableViewState extends State<SectionTableView> {
     //init scroll controller
     widget.controller.addListener(() {
       //listen section table controller to scroll the list view
-      if (sectionTableController.dirty) {
-        sectionTableController.dirty = false;
-        double offset = scrollOffsetFromIndex(sectionTableController.topIndex);
+      if (sectionController.dirty) {
+        sectionController.dirty = false;
+        double offset = scrollOffsetFromIndex(sectionController.topIndex);
         if (offset == null) {
           return;
         }
-        if (sectionTableController.animate) {
+        if (sectionController.animate) {
           widget.scrollController
               .animateTo(offset, duration: Duration(milliseconds: 250), curve: Curves.decelerate);
         } else {
@@ -313,6 +322,11 @@ class _SectionTableViewState extends State<SectionTableView> {
   }
 
   @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
   void dispose() {
     super.dispose();
 //    refreshController.dispose();
@@ -351,31 +365,6 @@ class _SectionTableViewState extends State<SectionTableView> {
     }
   }
 
-  Widget _headerCreate(BuildContext context, int mode) {
-    return new ClassicIndicator(
-        mode: mode,
-//        idleIcon: new Container(),
-        idleText: "加载更多",
-        refreshingText: "下拉刷新",
-        completeText: '刷新完成',
-        releaseText: '释放刷新哦');
-  }
-
-  void _onRefresh(up) {
-    if (up)
-      new Future.delayed(const Duration(milliseconds: 2009)).then((val) {
-//        _refreshController.scrollTo(_refreshController.scrollController.offset + 100.0);
-        widget.refreshController.sendBack(true, RefreshStatus.completed);
-        setState(() {});
-      });
-    else {
-      new Future.delayed(const Duration(milliseconds: 2009)).then((val) {
-        widget.refreshController.sendBack(false, RefreshStatus.completed);
-        setState(() {});
-      });
-    }
-  }
-
   void _onOffsetCallback(bool isUp, double offset) {
     // if you want change some widgets state ,you should rewrite the callback
   }
@@ -386,6 +375,7 @@ class _SectionTableViewState extends State<SectionTableView> {
 
   @override
   Widget build(BuildContext context) {
+    calculateIndexPathAndOffset();
     if (usePullRefresh()) {
       print(' use pull refresh');
       return SmartRefresher(
