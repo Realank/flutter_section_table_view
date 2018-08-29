@@ -8,3 +8,4 @@
 ## [0.1.1] - change divider layout
 ## [0.2.0] - add pull up/down refresh
 ## [0.2.1] - fix readme
+## [0.2.2] - fix readme
