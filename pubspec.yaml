@@ -10,6 +10,11 @@ dependencies:
   flutter:
     sdk: flutter
 
+  pull_to_refresh:
+    path: ./flutter_pulltorefresh
+#    git:
+#     url: git://github.com/Realank/flutter_pulltorefresh.git
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

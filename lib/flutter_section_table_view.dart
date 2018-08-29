@@ -1,8 +1,11 @@
 library flutter_section_table_view;
 
+export 'package:pull_to_refresh/pull_to_refresh.dart';
+
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'dart:math';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 typedef int RowCountInSectionCallBack(int section);
 typedef Widget CellAtIndexPathCallBack(int section, int row);
@@ -22,7 +25,6 @@ class IndexPath {
   }
 
   @override
-  // TODO: implement hashCode
   int get hashCode => super.hashCode;
   @override
   bool operator ==(other) {
@@ -35,14 +37,12 @@ class IndexPath {
 }
 
 class SectionTableController extends ChangeNotifier {
-  IndexPath topIndex;
+  IndexPath topIndex = IndexPath(section: 0, row: -1);
   bool dirty = false;
   bool animate = false;
   SectionTableViewScrollToCallBack sectionTableViewScrollTo;
 
-  SectionTableController({int section = 0, int row = -1, this.sectionTableViewScrollTo}) {
-    topIndex = IndexPath(section: section, row: row);
-  }
+  SectionTableController({this.sectionTableViewScrollTo});
 
   void jumpTo(int section, int row) {
     topIndex = IndexPath(section: section, row: row);
@@ -61,29 +61,77 @@ class SectionTableController extends ChangeNotifier {
 }
 
 class SectionTableView extends StatefulWidget {
-  final Widget divider;
+  //required
   final int sectionCount;
   final RowCountInSectionCallBack numOfRowInSection;
   final CellAtIndexPathCallBack cellAtIndexPath;
-  final SectionHeaderCallBack headerInSection;
 
+  //section header & divider
+  final SectionHeaderCallBack headerInSection;
+  final Widget divider;
+
+  //tell me cell & header & divider height, so that I can scroll to specific index path
+  //work with SectionTableController
   final SectionHeaderHeightCallBack sectionHeaderHeight; // must set when use SectionTableController
   final DividerHeightCallBack dividerHeight; // must set when use SectionTableController
   final CellHeightAtIndexPathCallBack
       cellHeightAtIndexPath; // must set when use SectionTableController
-
   final SectionTableController
       controller; //you can use this controller to scroll section table view
-  SectionTableView(
-      {@required this.sectionCount,
-      @required this.numOfRowInSection,
-      @required this.cellAtIndexPath,
-      this.divider,
-      this.headerInSection,
-      this.controller,
-      this.sectionHeaderHeight,
-      this.dividerHeight,
-      this.cellHeightAtIndexPath});
+
+  //pull refresh
+  final IndicatorBuilder refreshHeaderBuilder; // custom your own refreshHeader
+  final IndicatorBuilder refreshFooterBuilder; // custom your own refreshFooter
+  final Config refreshHeaderConfig, refreshFooterConfig; // configure your refresh header and footer
+  final bool enablePullUp;
+  final bool enablePullDown;
+  final OnRefresh onRefresh;
+
+  final ScrollController _scrollController;
+  final RefreshController refreshController;
+  ScrollController get scrollController => _scrollController;
+
+  SectionTableView({
+    Key key,
+    @required this.sectionCount,
+    @required this.numOfRowInSection,
+    @required this.cellAtIndexPath,
+    this.headerInSection,
+    this.divider,
+    this.sectionHeaderHeight,
+    this.dividerHeight,
+    this.cellHeightAtIndexPath,
+    this.controller,
+    refreshHeaderBuilder,
+    refreshFooterBuilder,
+    this.refreshHeaderConfig: const RefreshConfig(completeDuration: 200),
+    this.refreshFooterConfig: const RefreshConfig(completeDuration: 200),
+    this.enablePullDown: false,
+    this.enablePullUp: false,
+    this.onRefresh,
+    this.refreshController,
+  })  : this.refreshHeaderBuilder = refreshHeaderBuilder ??
+            ((BuildContext context, int mode) {
+              return new ClassicIndicator(mode: mode);
+            }),
+        this.refreshFooterBuilder = refreshFooterBuilder ??
+            ((BuildContext context, int mode) {
+              return new ClassicIndicator(
+                mode: mode,
+                releaseText: 'Load when release',
+                refreshingText: 'Loading...',
+                completeText: 'Load complete',
+                failedText: 'Load failed',
+                idleText: 'Pull up to load more',
+                idleIcon: const Icon(Icons.arrow_upward, color: Colors.grey),
+                releaseIcon: const Icon(Icons.arrow_downward, color: Colors.grey),
+              );
+            }),
+        assert((enablePullDown || enablePullUp) ? refreshController != null : true),
+        _scrollController = (enablePullDown || enablePullUp)
+            ? refreshController.scrollController
+            : ScrollController(),
+        super(key: key);
   @override
   _SectionTableViewState createState() => new _SectionTableViewState();
 }
@@ -91,8 +139,9 @@ class SectionTableView extends StatefulWidget {
 class _SectionTableViewState extends State<SectionTableView> {
   List<IndexPath> indexToIndexPathSearch = [];
   Map<String, double> indexPathToOffsetSearch;
-  ScrollController scrollController;
+
   final listViewKey = GlobalKey();
+
   //scroll position check
   int currentIndex;
   double preIndexOffset;
@@ -208,7 +257,6 @@ class _SectionTableViewState extends State<SectionTableView> {
     }
 
     //init scroll controller
-    scrollController = ScrollController(initialScrollOffset: initialOffset);
     widget.controller.addListener(() {
       //listen section table controller to scroll the list view
       if (sectionTableController.dirty) {
@@ -218,17 +266,17 @@ class _SectionTableViewState extends State<SectionTableView> {
           return;
         }
         if (sectionTableController.animate) {
-          scrollController.animateTo(offset,
-              duration: Duration(milliseconds: 250), curve: Curves.decelerate);
+          widget.scrollController
+              .animateTo(offset, duration: Duration(milliseconds: 250), curve: Curves.decelerate);
         } else {
-          scrollController.jumpTo(offset);
+          widget.scrollController.jumpTo(offset);
         }
       }
     });
     //listen scroll controller to feedback current index path
     if (indexPathToOffsetSearch != null) {
-      scrollController.addListener(() {
-        double currentOffset = scrollController.offset;
+      widget.scrollController.addListener(() {
+        double currentOffset = widget.scrollController.offset;
 //        print('scroll offset $currentOffset');
         if (currentOffset < preIndexOffset) {
           //go previous cell
@@ -267,7 +315,7 @@ class _SectionTableViewState extends State<SectionTableView> {
   @override
   void dispose() {
     super.dispose();
-    scrollController.dispose();
+//    refreshController.dispose();
     print('SectionTableView dispose');
   }
 
@@ -303,13 +351,66 @@ class _SectionTableViewState extends State<SectionTableView> {
     }
   }
 
+  Widget _headerCreate(BuildContext context, int mode) {
+    return new ClassicIndicator(
+        mode: mode,
+//        idleIcon: new Container(),
+        idleText: "加载更多",
+        refreshingText: "下拉刷新",
+        completeText: '刷新完成',
+        releaseText: '释放刷新哦');
+  }
+
+  void _onRefresh(up) {
+    if (up)
+      new Future.delayed(const Duration(milliseconds: 2009)).then((val) {
+//        _refreshController.scrollTo(_refreshController.scrollController.offset + 100.0);
+        widget.refreshController.sendBack(true, RefreshStatus.completed);
+        setState(() {});
+      });
+    else {
+      new Future.delayed(const Duration(milliseconds: 2009)).then((val) {
+        widget.refreshController.sendBack(false, RefreshStatus.completed);
+        setState(() {});
+      });
+    }
+  }
+
+  void _onOffsetCallback(bool isUp, double offset) {
+    // if you want change some widgets state ,you should rewrite the callback
+  }
+
+  bool usePullRefresh() {
+    return (widget.enablePullUp || widget.enablePullDown) && widget.refreshController != null;
+  }
+
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
-        key: listViewKey,
-        controller: scrollController,
-        itemBuilder: (context, index) {
-          return _buildCell(context, index);
-        });
+    if (usePullRefresh()) {
+      print(' use pull refresh');
+      return SmartRefresher(
+          headerBuilder: widget.refreshHeaderBuilder,
+          footerBuilder: widget.refreshFooterBuilder,
+          headerConfig: widget.refreshHeaderConfig,
+          footerConfig: widget.refreshFooterConfig,
+          enablePullDown: widget.enablePullDown,
+          enablePullUp: widget.enablePullUp,
+          controller: widget.refreshController,
+          onRefresh: widget.onRefresh,
+          onOffsetChange: _onOffsetCallback,
+          child: ListView.builder(
+              key: listViewKey,
+              itemBuilder: (context, index) {
+                return _buildCell(context, index);
+              }));
+    } else {
+      print('didn\'t use pull refresh');
+      return ListView.builder(
+          key: listViewKey,
+          controller: widget.scrollController,
+          itemBuilder: (context, index) {
+            return _buildCell(context, index);
+          });
+    }
   }
 }
