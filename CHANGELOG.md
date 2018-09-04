@@ -10,3 +10,4 @@
 ## [0.2.1] - fix readme
 ## [0.2.2] - fix readme
 ## [0.2.3] - format codes
+## [0.2.4] - fix dependencies
