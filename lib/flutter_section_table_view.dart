@@ -308,7 +308,7 @@ class _SectionTableViewState extends State<SectionTableView> {
             preIndexOffset =
                 indexPathToOffsetSearch[currentIndexPath.toString()];
             nextIndexOffset = indexPathToOffsetSearch[nextIndexPath.toString()];
-            print('go previous index $currentIndexPath');
+//            print('go previous index $currentIndexPath');
             if (widget.controller.sectionTableViewScrollTo != null) {
               widget.controller.sectionTableViewScrollTo(
                   currentIndexPath.section, currentIndexPath.row, false);
@@ -324,7 +324,7 @@ class _SectionTableViewState extends State<SectionTableView> {
             preIndexOffset =
                 indexPathToOffsetSearch[currentIndexPath.toString()];
             nextIndexOffset = indexPathToOffsetSearch[nextIndexPath.toString()];
-            print('go next index $currentIndexPath');
+//            print('go next index $currentIndexPath');
             if (widget.controller.sectionTableViewScrollTo != null) {
               widget.controller.sectionTableViewScrollTo(
                   currentIndexPath.section, currentIndexPath.row, true);
@@ -344,7 +344,7 @@ class _SectionTableViewState extends State<SectionTableView> {
   void dispose() {
     super.dispose();
 //    refreshController.dispose();
-    print('SectionTableView dispose');
+//    print('SectionTableView dispose');
   }
 
   @override
@@ -392,7 +392,7 @@ class _SectionTableViewState extends State<SectionTableView> {
   Widget build(BuildContext context) {
     calculateIndexPathAndOffset();
     if (usePullRefresh()) {
-      print(' use pull refresh');
+//      print(' use pull refresh');
       return SmartRefresher(
           headerBuilder: widget.refreshHeaderBuilder,
           footerBuilder: widget.refreshFooterBuilder,
@@ -409,7 +409,7 @@ class _SectionTableViewState extends State<SectionTableView> {
                 return _buildCell(context, index);
               }));
     } else {
-      print('didn\'t use pull refresh');
+//      print('didn\'t use pull refresh');
       return ListView.builder(
           key: listViewKey,
           controller: widget.scrollController,
