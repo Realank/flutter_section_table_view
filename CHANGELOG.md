@@ -14,3 +14,4 @@
 ## [0.2.5] - fix hint
 ## [1.0.0] - release stable version
 ## [1.0.1] - add always scroll physics
+## [1.0.2] - re-format
