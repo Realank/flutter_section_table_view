@@ -20,9 +20,8 @@ class _FullListState extends State<FullList> {
     super.dispose();
   }
 
-  int sectionCount = 4;
-  final controller = SectionTableController(
-      sectionTableViewScrollTo: (section, row, isScrollDown) {
+  int sectionCount = 0;
+  final controller = SectionTableController(sectionTableViewScrollTo: (section, row, isScrollDown) {
     print('received scroll to $section $row scrollDown:$isScrollDown');
   });
   final refreshController = RefreshController();
@@ -92,7 +91,7 @@ class _FullListState extends State<FullList> {
           refreshController: refreshController,
           sectionCount: sectionCount,
           numOfRowInSection: (section) {
-            return section == 0 ? 3 : 1;
+            return section == 0 ? 1 : 4;
           },
           cellAtIndexPath: (section, row) {
             return Container(
