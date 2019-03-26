@@ -10,7 +10,7 @@
 ## Usage
 
 #### minimal
-```
+```dart
 class MinList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -53,7 +53,7 @@ class MinList extends StatelessWidget {
 
 #### Section List which can scroll to specific index path
 
-```
+```dart
 
 class SectionList extends StatelessWidget {
   final controller = SectionTableController(sectionTableViewScrollTo: (section, row, isScrollDown) {
@@ -114,7 +114,7 @@ class SectionList extends StatelessWidget {
 ```
 
 #### Full function list which can pull up/down refresh
-```
+```dart
 class FullList extends StatefulWidget {
   @override
   _FullListState createState() => _FullListState();
