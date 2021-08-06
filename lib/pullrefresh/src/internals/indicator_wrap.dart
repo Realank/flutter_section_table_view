@@ -31,11 +31,11 @@ abstract class Wrapper extends StatefulWidget {
   set mode(int mode) => this.modeListener.value = mode;
 
   Wrapper(
-      {Key key,
-      @required this.up,
-      @required this.modeListener,
-      this.builder,
-      this.triggerDistance})
+      {Key? key,
+      required this.up,
+      required this.modeListener,
+      required this.builder,
+      required this.triggerDistance})
       : assert(up != null, modeListener != null),
         super(key: key);
 
@@ -59,17 +59,17 @@ abstract class Wrapper extends StatefulWidget {
 class RefreshWrapper extends Wrapper {
   final int completeDuration;
 
-  final Function onOffsetChange;
+  final Function? onOffsetChange;
 
   final double visibleRange;
 
   RefreshWrapper({
-    Key key,
-    IndicatorBuilder builder,
-    ValueNotifier<int> modeLis,
+    Key? key,
+    required IndicatorBuilder builder,
+    required ValueNotifier<int> modeLis,
     this.onOffsetChange,
     this.completeDuration: default_completeDuration,
-    double triggerDistance,
+    required double triggerDistance,
     this.visibleRange: default_VisibleRange,
     bool up: true,
   })  : assert(up != null),
@@ -91,7 +91,7 @@ class RefreshWrapper extends Wrapper {
 class RefreshWrapperState extends State<RefreshWrapper>
     with TickerProviderStateMixin
     implements GestureProcessor {
-  AnimationController _sizeController;
+  late AnimationController _sizeController;
 
   /*
       up indicate drag from top (pull down)
@@ -160,7 +160,7 @@ class RefreshWrapperState extends State<RefreshWrapper>
 
   void _handleOffsetCallBack() {
     if (widget.onOffsetChange != null) {
-      widget.onOffsetChange(
+      widget.onOffsetChange!(
           widget.up, _sizeController.value * widget.visibleRange);
     }
   }
@@ -239,12 +239,12 @@ class LoadWrapper extends Wrapper {
   final bool autoLoad;
 
   LoadWrapper(
-      {Key key,
-      @required bool up,
-      @required ValueNotifier<int> modeListener,
-      double triggerDistance,
-      this.autoLoad,
-      IndicatorBuilder builder})
+      {Key? key,
+      required bool up,
+      required ValueNotifier<int> modeListener,
+      required double triggerDistance,
+      required this.autoLoad,
+      required IndicatorBuilder builder})
       : assert(up != null, modeListener != null),
         super(
           key: key,
@@ -262,7 +262,7 @@ class LoadWrapper extends Wrapper {
 }
 
 class LoadWrapperState extends State<LoadWrapper> implements GestureProcessor {
-  Function _updateListener;
+  late Function() _updateListener;
 
   @override
   Widget build(BuildContext context) {

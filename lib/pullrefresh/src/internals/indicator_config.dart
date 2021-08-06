@@ -18,7 +18,7 @@ abstract class Config {
   // How many distances should be dragged to trigger refresh
   final double triggerDistance;
 
-  const Config({this.triggerDistance});
+  const Config({required this.triggerDistance});
 }
 
 class RefreshConfig extends Config {
