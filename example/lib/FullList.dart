@@ -79,6 +79,7 @@ class _FullListState extends State<FullList> {
 
             Future.delayed(const Duration(milliseconds: 2009)).then((val) {
               refreshController.sendBack(up, RefreshStatus.completed);
+              if (!mounted) return;
               setState(() {
                 if (up) {
                   sectionCount = 4;

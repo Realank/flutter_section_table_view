@@ -45,18 +45,18 @@ class SmartRefresher extends StatefulWidget {
   // if open OverScroll if you use RefreshIndicator and LoadFooter
   final bool enableOverScroll;
   // upper and downer callback when you drag out of the distance
-  final OnRefresh onRefresh;
+  final OnRefresh? onRefresh;
   // This method will callback when the indicator changes from edge to edge.
-  final OnOffsetChange onOffsetChange;
+  final OnOffsetChange? onOffsetChange;
   //controll inner state
   final RefreshController controller;
 
   SmartRefresher({
-    Key key,
-    @required this.child,
-    IndicatorBuilder headerBuilder,
-    IndicatorBuilder footerBuilder,
-    RefreshController controller,
+    Key? key,
+    required this.child,
+    IndicatorBuilder? headerBuilder,
+    IndicatorBuilder? footerBuilder,
+    RefreshController? controller,
     this.headerConfig: const RefreshConfig(),
     this.footerConfig: const LoadConfig(),
     this.enableOverScroll: default_enableOverScroll,
@@ -65,7 +65,7 @@ class SmartRefresher extends StatefulWidget {
     this.onRefresh,
     this.onOffsetChange,
   })  : assert(child != null),
-        controller = controller ?? new RefreshController(),
+        controller = controller ?? RefreshController(),
         this.headerBuilder = headerBuilder ??
             ((BuildContext context, int mode) {
               return new ClassicIndicator(mode: mode);
@@ -177,7 +177,7 @@ class _SmartRefresherState extends State<SmartRefresher> {
   }
 
   void _init() {
-    SchedulerBinding.instance.addPostFrameCallback((_) {
+    SchedulerBinding.instance?.addPostFrameCallback((_) {
       _onAfterBuild();
     });
     _scrollController.addListener(_handleOffsetCallback);
@@ -209,21 +209,21 @@ class _SmartRefresherState extends State<SmartRefresher> {
     if (overscrollPastStart > overscrollPastEnd) {
       if (widget.headerConfig is RefreshConfig) {
         if (widget.onOffsetChange != null) {
-          widget.onOffsetChange(true, overscrollPastStart);
+          widget.onOffsetChange!(true, overscrollPastStart);
         }
       } else {
         if (widget.onOffsetChange != null) {
-          widget.onOffsetChange(true, overscrollPastStart);
+          widget.onOffsetChange!(true, overscrollPastStart);
         }
       }
     } else if (overscrollPastEnd > 0) {
       if (widget.footerConfig is RefreshConfig) {
         if (widget.onOffsetChange != null) {
-          widget.onOffsetChange(false, overscrollPastEnd);
+          widget.onOffsetChange!(false, overscrollPastEnd);
         }
       } else {
         if (widget.onOffsetChange != null) {
-          widget.onOffsetChange(false, overscrollPastEnd);
+          widget.onOffsetChange!(false, overscrollPastEnd);
         }
       }
     }
@@ -233,7 +233,7 @@ class _SmartRefresherState extends State<SmartRefresher> {
     switch (mode.value) {
       case RefreshStatus.refreshing:
         if (widget.onRefresh != null) {
-          widget.onRefresh(up);
+          widget.onRefresh!(up);
         }
         if (up && widget.headerConfig is RefreshConfig) {
           RefreshConfig config = widget.headerConfig as RefreshConfig;
@@ -259,10 +259,11 @@ class _SmartRefresherState extends State<SmartRefresher> {
       _didChangeMode(false, bottomModeLis);
     });
     setState(() {
-      if (widget.enablePullDown)
-        _headerHeight = _headerKey.currentContext.size.height;
-      if (widget.enablePullUp) {
-        _footerHeight = _footerKey.currentContext.size.height;
+      final size = _headerKey.currentContext?.size;
+      if (widget.enablePullDown && size is Size)
+        _headerHeight = size.height;
+      if (widget.enablePullUp && size is Size) {
+        _footerHeight = size.height;
       }
     });
   }
@@ -297,7 +298,7 @@ class _SmartRefresherState extends State<SmartRefresher> {
         up: up,
         onOffsetChange: (bool up, double offset) {
           if (widget.onOffsetChange != null) {
-            widget.onOffsetChange(
+            widget.onOffsetChange!(
                 up,
                 up
                     ? -_scrollController.offset + offset
@@ -369,25 +370,23 @@ class _SmartRefresherState extends State<SmartRefresher> {
 abstract class Indicator extends StatefulWidget {
   final int mode;
 
-  const Indicator({Key key, this.mode}) : super(key: key);
+  const Indicator({Key? key, required this.mode}) : super(key: key);
 }
 
 class RefreshController {
-  ValueNotifier<int> _headerMode;
-  ValueNotifier<int> _footerMode;
+  ValueNotifier<int>? _headerMode;
+  ValueNotifier<int>? _footerMode;
   ScrollController scrollController;
 
-  RefreshController() {
-    scrollController = ScrollController();
-  }
+  RefreshController() : scrollController = ScrollController();
 
   void requestRefresh(bool up) {
-    if (up) {
-      if (_headerMode.value == RefreshStatus.idle)
-        _headerMode.value = RefreshStatus.refreshing;
-    } else {
-      if (_footerMode.value == RefreshStatus.idle) {
-        _footerMode.value = RefreshStatus.refreshing;
+    if (up && _headerMode is ValueNotifier<int>) {
+      if (_headerMode!.value == RefreshStatus.idle)
+        _headerMode!.value = RefreshStatus.refreshing;
+    } else if (_footerMode is ValueNotifier<int>) {
+      if (_footerMode!.value == RefreshStatus.idle) {
+        _footerMode!.value = RefreshStatus.refreshing;
       }
     }
   }
@@ -396,31 +395,31 @@ class RefreshController {
     scrollController.jumpTo(offset);
   }
 
-  Future<Null> animateTo(
+  Future<void> animateTo(
     double offset, {
-    @required Duration duration,
-    @required Curve curve,
+    required Duration duration,
+    required Curve curve,
   }) {
     return scrollController.animateTo(offset, duration: duration, curve: curve);
   }
 
   void sendBack(bool up, int mode) {
-    if (up) {
-      _headerMode.value = mode;
-    } else {
-      _footerMode.value = mode;
+    if (up && _headerMode is ValueNotifier<int>) {
+      _headerMode!.value = mode;
+    } else if (_footerMode is ValueNotifier<int>) {
+      _footerMode!.value = mode;
     }
   }
 
-  int get headerMode => _headerMode.value;
+  int? get headerMode => _headerMode?.value;
 
-  int get footerMode => _footerMode.value;
+  int? get footerMode => _footerMode?.value;
 
   isRefresh(bool up) {
-    if (up) {
-      return _headerMode.value == RefreshStatus.refreshing;
-    } else {
-      return _footerMode.value == RefreshStatus.refreshing;
+    if (up && _headerMode is ValueNotifier<int>) {
+      return _headerMode!.value == RefreshStatus.refreshing;
+    } else if (_footerMode is ValueNotifier<int>) {
+      return _footerMode!.value == RefreshStatus.refreshing;
     }
   }
 }

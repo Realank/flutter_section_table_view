@@ -18,11 +18,11 @@ class RefreshScrollPhysics extends ScrollPhysics {
 
   /// Creates scroll physics that bounce back from the edge.
   const RefreshScrollPhysics(
-      {ScrollPhysics parent, this.enableOverScroll: true})
+      {ScrollPhysics? parent, this.enableOverScroll: true})
       : super(parent: parent);
 
   @override
-  RefreshScrollPhysics applyTo(ScrollPhysics ancestor) {
+  RefreshScrollPhysics applyTo(ScrollPhysics? ancestor) {
     return new RefreshScrollPhysics(
         parent: buildParent(ancestor), enableOverScroll: enableOverScroll);
   }
@@ -103,7 +103,7 @@ class RefreshScrollPhysics extends ScrollPhysics {
   }
 
   @override
-  Simulation createBallisticSimulation(
+  Simulation? createBallisticSimulation(
       ScrollMetrics position, double velocity) {
     final Tolerance tolerance = this.tolerance;
     if (velocity.abs() >= tolerance.velocity || position.outOfRange) {

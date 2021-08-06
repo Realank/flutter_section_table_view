@@ -1,10 +1,10 @@
 name: flutter_section_table_view
 description: A iOS like table view (list view) including section, row, section header and divider, support pull refresh
-version: 1.0.3
+version: 1.0.4
 author: Realank <realank@126.com>
 homepage: https://github.com/Realank/flutter_section_table_view
 environment:
-    sdk: ">=2.0.0-dev.28.0 <3.0.0"
+    sdk: ">=2.13.0 <3.0.0"
 
 dependencies:
   flutter:
