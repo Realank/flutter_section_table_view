@@ -193,6 +193,7 @@ class RefreshWrapperState extends State<RefreshWrapper>
     // TODO: implement dispose
     widget.modeListener.removeListener(_handleModeChange);
     _sizeController.removeListener(_handleOffsetCallBack);
+    _sizeController.dispose();
     super.dispose();
   }
 
